@@ -1,0 +1,18 @@
+Starting Nmap 7.94SVN ( https://nmap.org ) at 2026-07-20 01:36 EAT
+Nmap scan report for 192.168.122.68
+Host is up (0.000090s latency).
+Not shown: 996 closed tcp ports (conn-refused)
+PORT   STATE SERVICE VERSION
+21/tcp open  ftp     vsftpd 3.0.5
+22/tcp open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.16 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   256 5e:5e:11:ae:f6:70:a5:2a:31:2a:10:4a:81:66:b5:74 (ECDSA)
+|_  256 7d:7e:cc:ae:6e:60:58:61:6f:68:4e:e0:7f:ee:90:01 (ED25519)
+23/tcp open  telnet  Linux telnetd
+80/tcp open  http    Apache httpd 2.4.52 ((Ubuntu))
+|_http-title: Apache2 Ubuntu Default Page: It works
+|_http-server-header: Apache/2.4.52 (Ubuntu)
+Service Info: OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 13.52 seconds
