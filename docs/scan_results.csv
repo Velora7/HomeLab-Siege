@@ -1,0 +1,4 @@
+Port,Service,Status
+23,Telnet,Open
+80,Apache,Open
+22,SSH,Closed

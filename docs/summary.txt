@@ -1,0 +1,3 @@
+HomeLab Siege Project Summary
+Attack: Nmap scan found open ports
+Defense: iptables blocked attacker IP
