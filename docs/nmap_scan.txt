@@ -1,0 +1,3 @@
+# Nmap Scan Results
+Port 23/tcp - Telnet
+Port 80/tcp - Apache
