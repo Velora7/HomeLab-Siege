@@ -2,7 +2,7 @@ HomeLab Siege
 
 This is a red team / blue team exercise I built on my own machine to practice network security, packet analysis, and Linux defense. I used KVM virtual machines to isolate the environment.
 
-------------------------------------------------------------
+
 
 Lab Setup
 
@@ -13,7 +13,6 @@ Lab Setup
 
 Both VMs are running on the same host. The target has no firewall enabled at the start. This lets me simulate a real unprotected server.
 
-------------------------------------------------------------
 
 Attack Phase
 
@@ -30,7 +29,7 @@ Telnet is a known insecure protocol. It sends credentials in plain text. This ma
 
 I also checked the Apache default page to confirm the service was running properly.
 
-------------------------------------------------------------
+
 
 Packet Capture Phase
 
@@ -45,7 +44,6 @@ I filtered for SYN packets coming from the Kali IP. I could clearly see the port
 
 I also looked at the Telnet traffic later to confirm it was working.
 
-------------------------------------------------------------
 
 Defense Phase
 
@@ -60,7 +58,7 @@ To test I tried pinging the target from Kali. The ping hung and eventually timed
 
 I checked the iptables counters and saw the dropped packets increasing. This confirmed the rule was working.
 
-------------------------------------------------------------
+
 
 What I Learned
 
@@ -70,7 +68,6 @@ Firewall rules are effective but need to be placed correctly. Inserting at the t
 
 This lab gave me hands on experience with tools I have only read about before. It also showed me how attackers think when they are looking for open doors.
 
-------------------------------------------------------------
 
 Tools Used
 
@@ -83,10 +80,6 @@ Tools Used
 - KVM / libvirt
 - virt-install
 - virt-viewer
-
-------------------------------------------------------------
-
-Next Steps
 
 I plan to add more targets and services to this lab. I also want to try using Suricata for intrusion detection and log analysis. Another idea is to simulate a web application attack using DVWA or a similar deliberately vulnerable app.
 
