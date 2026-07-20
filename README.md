@@ -1,87 +1,210 @@
-HomeLab Siege
+HomeLab-Siege
 
-This is a red team / blue team exercise I built on my own machine to practice network security, packet analysis, and Linux defense. I used KVM virtual machines to isolate the environment.
-
-
-
-Lab Setup
-
-- Attacker machine: Kali Linux with IP 192.168.122.197
-- Target machine: Ubuntu Server 22.04 with IP 192.168.122.68
-- Hypervisor: KVM / QEMU on Linux Mint
-- Network: Default libvirt NAT network
-
-Both VMs are running on the same host. The target has no firewall enabled at the start. This lets me simulate a real unprotected server.
+A hands-on network security lab where I attacked, analyzed, and defended a virtual target using real Linux tools.
 
 
-Attack Phase
-
-I started by running Nmap from the Kali machine to scan the target. I used a standard SYN scan to check for open ports. I also added service detection to see what was running on each port.
-
-Nmap command:
-nmap -sS -sV 192.168.122.68
-
-Results showed two open ports:
-- Port 23 / TCP - Telnet service
-- Port 80 / TCP - Apache HTTP server
-
-Telnet is a known insecure protocol. It sends credentials in plain text. This made the target vulnerable to basic attacks.
-
-I also checked the Apache default page to confirm the service was running properly.
+Built with: KVM/QEMU | Kali Linux | Ubuntu Server | Nmap | tcpdump | tshark | iptables | Bash
 
 
+What This Project Is
 
-Packet Capture Phase
+I built this lab to understand how attackers think and how defenders stop them. No simulations, no shortcuts — just real tools on real virtual machines.
 
-While the scan was running I started tcpdump on the Ubuntu target. I saved everything to a pcap file.
+I set up two VMs on my Linux Mint machine using KVM. One runs Kali Linux as the attacker. The other runs Ubuntu Server as the target. I scanned the target with Nmap, captured every packet with tcpdump, analyzed the traffic with tshark, and blocked the attacker using iptables.
 
-Command:
+This project gave me practical experience in network reconnaissance, packet analysis, and Linux firewall management. Everything is documented here — logs, captures, scripts, and what I learned.
+
+
+The Setup
+
+Here’s how the lab is structured:
+
+                    +-------------------------+
+                    |   Linux Mint Host        |
+                    |   (KVM/QEMU Hypervisor)  |
+                    +-------------------------+
+                              |
+                    +-------------------------+
+                    |   libvirt NAT Network    |
+                    |   192.168.122.0/24       |
+                    +-------------------------+
+                              |
+           +------------------+------------------+
+           |                                     |
++-------------------------+        +-------------------------+
+|   Kali Linux            |        |   Ubuntu Server         |
+|   (Attacker)            |        |   (Target)              |
+|   IP: 192.168.122.197   |        |   IP: 192.168.122.68    |
++-------------------------+        +-------------------------+
+|   Tools:                 |        |   Services:             |
+|   - Nmap                 |        |   - Telnet (port 23)    |
+|   - ping                 |        |   - Apache (port 80)    |
+|   - telnet               |        |   - vsftpd              |
++-------------------------+        +-------------------------+
+
+VM Specs:
+
+VM          OS                  RAM     CPU     Disk    IP Address
+Attacker    Kali Linux 2026.2   4GB     2 vCPU  25GB    192.168.122.197
+Target      Ubuntu Server 22.04 2GB     1 vCPU  15GB    192.168.122.68
+
+Network: libvirt NAT on 192.168.122.0/24, gateway 192.168.122.1, DHCP managed by libvirt.
+
+
+The Attack
+
+I started by scanning the target to see what was open.
+
+First scan:
+nmap -sS 192.168.122.68
+
+Found two open ports:
+- Port 23: Telnet
+- Port 80: Apache HTTP
+
+Then I dug deeper to find out what versions were running and what OS the target was using.
+
+nmap -sV -O -T4 192.168.122.68
+
+Results:
+- Telnet: Linux telnetd
+- Apache: 2.4.52 (Ubuntu)
+- OS: Linux (Ubuntu, kernel 4.x or 5.x)
+
+Next, I ran vulnerability scripts to check for known issues.
+
+nmap --script vuln 192.168.122.68
+
+Key findings:
+- Telnet uses plaintext communication. No encryption.
+- Apache is serving the default page.
+- The target is running common, older services.
+
+Finally, I ran a full aggressive scan combining everything.
+
+nmap -sS -sV -O -T4 --script vuln 192.168.122.68 -oX nmap_full.xml
+
+All attack data was saved and later analyzed.
+
+
+Capturing the Traffic
+
+While the attack was running, I captured all network traffic on the target machine using tcpdump.
+
 sudo tcpdump -i enp1s0 -w capture.pcap
 
-After the scan ended I stopped tcpdump and opened the file with tshark. I wanted to see what the Nmap scan actually looked like on the wire.
+Total packets captured: 2799
+Packets dropped: 0
 
-I filtered for SYN packets coming from the Kali IP. I could clearly see the port by port probe. Each port got a SYN packet and the target responded with SYN-ACK for open ports or RST for closed ones.
+Then I analyzed the capture using tshark.
 
-I also looked at the Telnet traffic later to confirm it was working.
+To see all packets:
+tshark -r capture.pcap | head -20
+
+To filter traffic from the attacker:
+tshark -r capture.pcap -Y "ip.src==192.168.122.197"
+
+To find SYN packets:
+tshark -r capture.pcap -Y "tcp.flags.syn==1"
+
+To see Telnet traffic:
+tshark -r capture.pcap -Y "tcp.port==23"
+
+What I saw:
+- SYN packets sent to every port from 0 to 65535.
+- SYN-ACK responses on ports 23 and 80.
+- RST responses on closed ports.
+- Plaintext Telnet traffic.
+- Nmap probing Apache for version info.
+
+The packet capture gave me full visibility into the attack. Without it, I would have been blind.
 
 
-Defense Phase
+The Defense
 
-Once I confirmed the attack was visible in the packet capture I moved to defense. I used iptables to block the attacker.
+Once I confirmed the attack was real, I blocked the attacker using iptables on the target machine.
 
-I inserted a rule at the top of the INPUT chain to drop all traffic from Kali.
-
-Command:
 sudo iptables -I INPUT 1 -s 192.168.122.197 -j DROP
 
-To test I tried pinging the target from Kali. The ping hung and eventually timed out with 100 percent packet loss.
+This rule:
+- Goes to the top of the firewall chain.
+- Drops all traffic from the attacker’s IP.
+- Works silently — the attacker sees nothing.
 
-I checked the iptables counters and saw the dropped packets increasing. This confirmed the rule was working.
+I automated this with a script (scripts/defense.sh) that also:
+- Rate limits web traffic.
+- Drops invalid packets.
+- Blocks common scan patterns.
 
+To verify the defense worked, I tried pinging the target from Kali.
+
+ping 192.168.122.68
+
+Result: 100% packet loss. All traffic was dropped. The attacker was fully blocked.
+
+I also checked iptables counters:
+pkts bytes target     source               destination
+   12  1008 DROP      192.168.122.197      0.0.0.0/0
+
+The count kept going up. The block was working.
+
+
+Results Summary
+
+Attack:
+- Found two open services (Telnet and Apache)
+- Identified OS and versions
+- Ran vulnerability checks
+- Completed full scan in under 20 seconds
+
+Defense:
+- Blocked attacker IP
+- Applied rate limiting and scan detection
+- Verified with ping test
+- 100% packet loss confirmed
+
+Packet Capture:
+- Captured 2799 packets
+- Analyzed with tshark
+- Full visibility into attacker behavior
+
+
+Project Structure
+
+HomeLab-Siege/
+├── README.md
+├── scripts/defense.sh
+├── logs/
+│   ├── nmap_scan.txt
+│   ├── capture.pcap
+│   └── iptables_rules.txt
+├── docs/
+│   ├── topology.txt
+│   ├── scan_results.csv
+│   └── analysis.txt
+├── reports/
+│   ├── nmap_full.xml
+│   └── nmap_epic.xml
+└── images/
+    ├── nmap_scan.png
+    ├── ping_blocked.png
+    └── tcpdump_capture.png
 
 
 What I Learned
 
-Packet capture gives you full visibility into what is hitting your machine. Without it I would only know that a scan happened but not how or when.
+Some things I’ll take away from this project:
 
-Firewall rules are effective but need to be placed correctly. Inserting at the top of the chain made sure the block happened before any allow rules.
+Visibility is everything. Without tcpdump, I wouldn’t have seen the attack happening. Packet captures turn an abstract scan into something you can actually see and analyze.
 
-This lab gave me hands on experience with tools I have only read about before. It also showed me how attackers think when they are looking for open doors.
+Firewall rules need to be placed correctly. Inserting the block at the top of the chain made sure it took effect before any allow rules. Small detail, big impact.
 
+Nmap is a powerful tool. In less than a minute, I had a full picture of the target — open ports, services, OS, and potential vulnerabilities.
 
-Tools Used
+Telnet is still out there. It’s insecure, uses plaintext, and should be replaced with SSH. But it’s a great service to practice on.
 
-- Kali Linux
-- Ubuntu Server
-- Nmap
-- tcpdump
-- tshark / Wireshark
-- iptables
-- KVM / libvirt
-- virt-install
-- virt-viewer
+Automation makes defense repeatable. Writing a bash script meant I could apply the same firewall rules instantly across different sessions.
 
-I plan to add more targets and services to this lab. I also want to try using Suricata for intrusion detection and log analysis. Another idea is to simulate a web application attack using DVWA or a similar deliberately vulnerable app.
+Documentation matters. Writing down what I did helped me organize my thoughts and created a record I can reference later.
 
-This project will keep growing as I learn more.
 
