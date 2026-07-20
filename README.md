@@ -15,33 +15,6 @@ I set up two VMs on my Linux Mint machine using KVM. One runs Kali Linux as the 
 This project gave me practical experience in network reconnaissance, packet analysis, and Linux firewall management. Everything is documented here — logs, captures, scripts, and what I learned.
 
 
-The Setup
-
-Here’s how the lab is structured:
-
-                    +-------------------------+
-                    |   Linux Mint Host        |
-                    |   (KVM/QEMU Hypervisor)  |
-                    +-------------------------+
-                              |
-                    +-------------------------+
-                    |   libvirt NAT Network    |
-                    |   192.168.122.0/24       |
-                    +-------------------------+
-                              |
-           +------------------+------------------+
-           |                                     |
-+-------------------------+        +-------------------------+
-|   Kali Linux            |        |   Ubuntu Server         |
-|   (Attacker)            |        |   (Target)              |
-|   IP: 192.168.122.197   |        |   IP: 192.168.122.68    |
-+-------------------------+        +-------------------------+
-|   Tools:                 |        |   Services:             |
-|   - Nmap                 |        |   - Telnet (port 23)    |
-|   - ping                 |        |   - Apache (port 80)    |
-|   - telnet               |        |   - vsftpd              |
-+-------------------------+        +-------------------------+
-
 VM Specs:
 
 VM          OS                  RAM     CPU     Disk    IP Address
