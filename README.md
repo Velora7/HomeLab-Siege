@@ -173,11 +173,11 @@ HomeLab-Siege/
 
 └── images/
 
-    ├── nmap_scan.png
+│ ├── nmap_scan.png
     
-    ├── ping_blocked.png
+│   ├── ping_blocked.png
     
-    └── tcpdump_capture.png
+│    └── tcpdump_capture.png
 
 
 What I Learned
