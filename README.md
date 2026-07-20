@@ -8,7 +8,7 @@ Built with: KVM/QEMU | Kali Linux | Ubuntu Server | Nmap | tcpdump | tshark | ip
 
 What This Project Is
 
-I built this lab to understand how attackers think and how defenders stop them. No simulations, no shortcuts — just real tools on real virtual machines.
+I built this lab to understand how attackers think and how defenders stop them. No simulations, no shortcuts just real tools on real virtual machines.
 
 I set up two VMs on my Linux Mint machine using KVM. One runs Kali Linux as the attacker. The other runs Ubuntu Server as the target. I scanned the target with Nmap, captured every packet with tcpdump, analyzed the traffic with tshark, and blocked the attacker using iptables.
 
@@ -146,21 +146,37 @@ Project Structure
 
 HomeLab-Siege/
 ├── README.md
+
 ├── scripts/defense.sh
+
 ├── logs/
+
 │   ├── nmap_scan.txt
+
 │   ├── capture.pcap
+
 │   └── iptables_rules.txt
+
 ├── docs/
+
 │   ├── topology.txt
+
 │   ├── scan_results.csv
+
 │   └── analysis.txt
+
 ├── reports/
+
 │   ├── nmap_full.xml
+
 │   └── nmap_epic.xml
+
 └── images/
+
     ├── nmap_scan.png
+    
     ├── ping_blocked.png
+    
     └── tcpdump_capture.png
 
 
